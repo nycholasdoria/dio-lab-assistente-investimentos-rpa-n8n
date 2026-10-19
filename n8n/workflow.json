@@ -1,0 +1,430 @@
+{
+  "name": "Assistente de Investimento com RPA",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "Clientes",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "7eae457f-72be-434b-b549-f3dd948281ef",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        -512,
+        -32
+      ],
+      "webhookId": "46ac1129-4451-493e-bd2e-7910ed9a0594"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "00cb2c63-e373-4bf1-92d0-8dc7d8248cc3",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        928,
+        -352
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Webhook\nGatilho conectado ao Script em Python para entrada de dados",
+        "height": 320,
+        "width": 304
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -592,
+        -160
+      ],
+      "typeVersion": 1,
+      "id": "691f4d15-0cf0-417f-8894-e749b310b4cd",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "url": "https://digitalinnovationone.github.io/dio-lab-assistente-investimentos-rpa-n8n/data.csv",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -224,
+        -32
+      ],
+      "id": "baa18eb7-4afb-4c37-b6ea-6bde42800272",
+      "name": "busca_investimento"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Substitua 'meu_csv' pelo nome do campo que contém o texto do ficheiro CSV vindo do nó anterior\nconst csvText = $input.first().json.investimentos; \n\n// Separa o texto em linhas e remove linhas vazias\nconst lines = csvText.split('\\n').filter(line => line.trim() !== '');\n\n// Extrai o cabeçalho (primeira linha) e separa pelas vírgulas\nconst headers = lines[0].split(',').map(header => header.trim());\n\nconst result = [];\n\n// Itera sobre as restantes linhas de dados\nfor (let i = 1; i < lines.length; i++) {\n    const currentLine = lines[i].split(',');\n    const obj = {};\n\n    // Mapeia cada valor para o seu respetivo cabeçalho\n    for (let j = 0; j < headers.length; j++) {\n        obj[headers[j]] = currentLine[j] ? currentLine[j].trim() : '';\n    }\n\n    // O n8n exige que a saída de dados esteja encapsulada na propriedade 'json'\n    result.push({ json: obj });\n}\n\nreturn result;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        160,
+        -32
+      ],
+      "id": "4e17dd81-0093-4db7-afd0-f0c22a665caa",
+      "name": "transforma_CSV_em_JSON"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5c85837e-b118-4164-8a32-3b7d77cbbf19",
+              "name": "investimentos",
+              "value": "={{ $json.data }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        -48,
+        -32
+      ],
+      "id": "b983b483-b09f-42b4-9c9e-685262aa0da2",
+      "name": "renomear_campo"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "perfil",
+              "field2": "perfil"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        416,
+        -352
+      ],
+      "id": "58ee52df-f453-4a3b-ad8c-c21f4e495436",
+      "name": "cruza_perfil_investimentos"
+    },
+    {
+      "parameters": {
+        "content": "## Transforma CSV em Texto\nCódigo em JavaScript que transforma o CSV em texto",
+        "height": 320,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        96,
+        -160
+      ],
+      "typeVersion": 1,
+      "id": "2145ed8e-5995-43a7-a70b-a9fd22096608",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Cruza Informações\nCruza o perfil do investidor com as opções de investimento",
+        "height": 320,
+        "width": 224,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        352,
+        -496
+      ],
+      "typeVersion": 1,
+      "id": "a9967a08-3903-4701-b332-e3d65f105153",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Busca Investimentos e Renomeia campos",
+        "height": 320,
+        "width": 352,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -272,
+        -160
+      ],
+      "typeVersion": 1,
+      "id": "4dc5d475-1613-423c-b3c8-7bc5b8c099b2",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = [];\n\n// Itera sobre todos os clientes que chegaram neste nó\nfor (const item of $input.all()) {\n  const cliente = item.json;\n  let mensagem_estatica = \"\";\n\n  // Cria a mensagem estática baseada nas regras do MVP\n  if (cliente.perfil === \"Conservador\") {\n    mensagem_estatica = `Olá, ${cliente.nome}! Notamos que seu perfil é Conservador. Para o seu saldo atual, nossa recomendação tem foco em renda fixa e segurança. Sugestão de investimento: ${$input.first().json.produto}.`;\n    \n  } else if (cliente.perfil === \"Moderado\") {\n    mensagem_estatica = `Olá, ${cliente.nome}! Sendo o seu perfil Moderado, o ideal para o seu saldo é buscar um mix equilibrado entre renda fixa e variável. Sugestão de investimento: ${$input.first().json.produto}.`;\n    \n  } else if (cliente.perfil === \"Arrojado\") {\n    mensagem_estatica = `Olá, ${cliente.nome}! Identificamos seu perfil Arrojado. Para potencializar seu saldo, recomendamos dar ênfase em ações buscando maior potencial de retorno. Sugestão de investimento: ${$input.first().json.produto}.`;\n  }\n\n  // Adiciona a mensagem gerada ao pacote de dados do cliente\n  result.push({\n    json: {\n      ...cliente,\n      mensagem_final: mensagem_estatica\n    }\n  });\n}\n\nreturn result;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        656,
+        -352
+      ],
+      "id": "c703b881-b9ce-44b1-ac64-11173840edb7",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "body.clientes",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1.1,
+      "position": [
+        160,
+        -368
+      ],
+      "id": "de0b66b3-84d9-4bf4-8b29-5249f1acc76b",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "content": "## Mensagens Estáticas",
+        "height": 320,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        592,
+        -496
+      ],
+      "typeVersion": 1,
+      "id": "5a90234e-66a4-4d6c-b850-bda6ec65f991",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## Separador de Itens\nDesagrupa a lista em elementos individuais",
+        "height": 320,
+        "color": "#D6C7FF"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        96,
+        -496
+      ],
+      "typeVersion": 1,
+      "id": "a0c9109e-0084-4f2c-8e4e-d0d647e6a57e",
+      "name": "Sticky Note5"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "nykodio1.app.n8n.cloud",
+            "user-agent": "python-requests/2.32.4",
+            "content-length": "1047",
+            "accept": "*/*",
+            "accept-encoding": "gzip, br",
+            "cdn-loop": "cloudflare; loops=1; subreqs=1",
+            "cf-connecting-ip": "104.196.223.209",
+            "cf-ew-via": "15",
+            "cf-ipcountry": "US",
+            "cf-ray": "a4cb1c3748a238de-ATL",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "cf-worker": "n8n.cloud",
+            "content-type": "application/json",
+            "x-forwarded-for": "104.196.223.209, 104.23.245.69",
+            "x-forwarded-host": "nykodio1.app.n8n.cloud",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "traefik-prod-users-gwc-45-758d9d6c7b-jhtvw",
+            "x-is-trusted": "yes",
+            "x-real-ip": "104.196.223.209"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "clientes": [
+              {
+                "nome": "Ana Silva",
+                "email": "ana@email.com",
+                "saldo": "R$ 12.500,00",
+                "perfil": "Conservador"
+              },
+              {
+                "nome": "Bruno Lima",
+                "email": "bruno@email.com",
+                "saldo": "R$ 3.200,00",
+                "perfil": "Moderado"
+              },
+              {
+                "nome": "Carla Souza",
+                "email": "carla@email.com",
+                "saldo": "R$ 28.900,00",
+                "perfil": "Arrojado"
+              },
+              {
+                "nome": "Daniel Oliveira",
+                "email": "daniel@email.com",
+                "saldo": "R$ 850,00",
+                "perfil": "Conservador"
+              },
+              {
+                "nome": "Elena Rodrigues",
+                "email": "elena@email.com",
+                "saldo": "R$ 45.000,00",
+                "perfil": "Arrojado"
+              },
+              {
+                "nome": "Felipe Santos",
+                "email": "felipe@email.com",
+                "saldo": "R$ 7.800,00",
+                "perfil": "Moderado"
+              },
+              {
+                "nome": "Gabriela Costa",
+                "email": "gabriela@email.com",
+                "saldo": "R$ 1.500,00",
+                "perfil": "Conservador"
+              },
+              {
+                "nome": "Henrique Alves",
+                "email": "henrique@email.com",
+                "saldo": "R$ 22.300,00",
+                "perfil": "Moderado"
+              },
+              {
+                "nome": "Isabela Martins",
+                "email": "isabela@email.com",
+                "saldo": "R$ 500,00",
+                "perfil": "Conservador"
+              },
+              {
+                "nome": "João Pereira",
+                "email": "joao@email.com",
+                "saldo": "R$ 15.000,00",
+                "perfil": "Arrojado"
+              }
+            ]
+          },
+          "webhookUrl": "https://nykodio1.app.n8n.cloud/webhook-test/Clientes",
+          "executionMode": "test"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "busca_investimento",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        []
+      ]
+    },
+    "busca_investimento": {
+      "main": [
+        [
+          {
+            "node": "renomear_campo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "renomear_campo": {
+      "main": [
+        [
+          {
+            "node": "transforma_CSV_em_JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "transforma_CSV_em_JSON": {
+      "main": [
+        [
+          {
+            "node": "cruza_perfil_investimentos",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "cruza_perfil_investimentos": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "cruza_perfil_investimentos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "c9d89df3-bbd4-4003-a30c-e5ade81029ae",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "33d3e244a3480c9ab673d424c695f5a912058c885d490d69cfaacc117b8581b1"
+  },
+  "nodeGroups": [],
+  "id": "i5oUo2TKx3IIVqOk",
+  "tags": []
+}
